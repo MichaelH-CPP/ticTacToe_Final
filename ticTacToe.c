@@ -65,36 +65,36 @@ void handle_response_trigger()
     }
 }
 
-// ---------- AI Mode Message Callback ----------
-void ai_callback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *msg)
-{
-    printf("Callback switched to ai_callback\n");
+// // ---------- AI Mode Message Callback ----------
+// void ai_callback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *msg)
+// {
+//     printf("Callback switched to ai_callback\n");
 
-    if (msg->payloadlen)
-    {
-        printf("AI Callback: Received message on topic [%s]\n", msg->topic);
-        char message[msg->payloadlen + 1];
-        memcpy(message, msg->payload, msg->payloadlen);
-        message[msg->payloadlen] = '\0';
+//     if (msg->payloadlen)
+//     {
+//         printf("AI Callback: Received message on topic [%s]\n", msg->topic);
+//         char message[msg->payloadlen + 1];
+//         memcpy(message, msg->payload, msg->payloadlen);
+//         message[msg->payloadlen] = '\0';
 
-        if (strcmp(message, "stop") == 0)
-        {
-            mosquitto_message_callback_set(mosq, on_message); // Exit AI mode
-        }
-        else if (strlen(message) == 9) // Heuristic: looks like a board
-        {
-            char board[10];
-            strncpy(board, message, 9);
-            board[9] = '\0';
-            aiX_play(board);
-            publish_response(board);
-        }
-        else
-        {
-            printf("%s\n", message);
-        }
-    }
-}
+//         if (strcmp(message, "stop") == 0)
+//         {
+//             mosquitto_message_callback_set(mosq, on_message); // Exit AI mode
+//         }
+//         else if (strlen(message) == 9) // Heuristic: looks like a board
+//         {
+//             char board[10];
+//             strncpy(board, message, 9);
+//             board[9] = '\0';
+//             aiX_play(board);
+//             publish_response(board);
+//         }
+//         else
+//         {
+//             printf("%s\n", message);
+//         }
+//     }
+// }
 
 // ---------- Enter AI Mode ----------
 // void ai_mode()
@@ -124,10 +124,8 @@ void on_message(struct mosquitto *mosq, void *userdata, const struct mosquitto_m
         }
         if (ai_mode)
         {
-            printf("In the AI\n");
             if (strcmp(message, "stop") == 0)
             {
-                printf("AI Stopped\n");
                 ai_mode = false; // Exit AI mode
             }
             else if (strlen(message) == 9) // Heuristic: looks like a board
@@ -185,12 +183,7 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        int rc = mosquitto_loop(mosq, -1, 1);
-        if (rc != MOSQ_ERR_SUCCESS)
-        {
-            printf("Loop error: %d\n", rc);
-            break;
-        }
+        mosquitto_loop(mosq, -1, 1);
     }
 
     mosquitto_destroy(mosq);
